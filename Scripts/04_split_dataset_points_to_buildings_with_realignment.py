@@ -29,7 +29,7 @@ unaligned_output_path     = "S:/OSS/Data/Unaligned_point_clouds/"
 visualize_alignment_steps = False
 radius_normal             = 0.4
 matching_resolution       = 0.02
-    force_las_output          = True
+force_las_output          = True
 
 input_building_list       = ["building_349.obj"] # Insert comma-separated building object files.
 
