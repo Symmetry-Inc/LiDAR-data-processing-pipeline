@@ -1,42 +1,77 @@
 # LiDAR-data-processing-pipeline
-Scripts for extracting buildings from LiDAR dataset (assumed already segmented) using existing LOD2 models, aligning and combining them, and creating meshes.
+既にセグメンテーションされた LiDAR データセットから建物を抽出し、既存の LOD2 モデルを使用して、それらをアラインメント・結合し、メッシュを作成するためのスクリプトです。
 
-## Initial setup
-Test data is provided in the form of a set of LAS files, which all contain data for a building used for testing (building_349). The test data needs to be extracted from a zip package that is located in the folder "Data/Test_segmented_data/".
+## 概要
+公共交通のバスやタクシー等のモビリティに搭載されたLiDAR等で定常的に取得される点群データや、スマートフォン等で市民が日常的に取得できるデータを活用して、3D都市モデルのデータソースを取得。これに基づきアラインメント・更新箇所検出を行うA.I.モデルを及び3D都市モデルを生成する自動モデリングツールの使用方法を記載したものです。  
 
-The scripts require LOD2 objects for the target buildings. A single LOD2 model for the test building is included in the folder "Data/LOD2/". It was created by extracting buildings from a LOD2 model of the Sendai center, and has the building in its correct world position so that LiDAR data can be directly compared with it.
+## モジュール構成
+今回、実証開発した3D都市モデル自動生成システムは、大きく4つのモジュールを6つのステップで動作させるものです。
+構成モジュールは次の通りです。
+ * A. 点群アラインメント
+ * B. LOD2モデルに基づいた点群分割アルゴリズム 
+ * C. メッシュ化
+ * D. 更新箇所検出 (別リポジトリ)
 
-The scripts were developed on a Windows 10 PC, and might require some modifications to run on other platforms. The iPSR algorithm used for iterative mesh generation (https://github.com/houfei0801/ipsr) is included as a Windows executable, and needs to be recompiled for other platforms.
+これらのモジュールは、次のステップで実行されます。
 
-More detailed instructions and images of the script outputs can be found in the included instructions.pdf file.
+1. 建物のフットプリントを作成する (モジュールB)
+2. フットプリントポリゴンの拡張 (モジュールB)
+3. 建物の抽出とデータのアラインメント (モジュールA)
+4. LiDAR データと LOD2 データの結合 (モジュールA)
+5. 更新箇所検出（モジュールD）
+6. iPSR アルゴリズムを使用してメッシュを作成する (モジュールC)
 
-## Create building footprints
-After modifying the input and output parameters in the script, create 0-dilation 2D footprint polygons for each LOD2 building model:
+このリポジトリではモジュールA〜Cのみを公開しており、D. 更新箇所検出については別のリポジトリとなります。
+
+## 初期設定
+テストデータは、テストに使用される建物のデータをすべて含む一連の LAS ファイルの形で提供されます（建物 349 を使用）。テストデータは、 `Data/Test_segmented_data/` フォルダ内にある zip パッケージから抽出する必要があります。
+
+これらのスクリプトでは、対象の建物の LOD2 オブジェクトが必要です。テスト用の建物については、LOD2 モデルが「Data/LOD2/」フォルダに含まれています。この LOD2 モデルは、仙台中心部の LOD2 モデルから建物を抽出し、LiDAR データを直接比較できるように、建物が正しい位置に配置されています。
+
+これらのスクリプトは、Windows 10 PC 上で開発されました。他のプラットフォームで実行するには、いくつかの修正が必要な場合があります。反復的なメッシュ生成に使用される iPSR アルゴリズム (https://github.com/houfei0801/ipsr) は Windows 実行可能ファイルとして含まれており、他のプラットフォーム用に再コンパイルする必要があります。
+
+詳細な手順とスクリプトの出力画像については、instructions.pdf ファイルを参照してください。
+
+## 1. 建物のフットプリントを作成する
+スクリプト内の入力パラメータと出力パラメータを修正した後、各 LOD2 建物モデルの 0-dilation 2D フットプリントポリゴンを作成してください。
+
 ```sh
 python Scripts/01_create_footprint_polygons.py
 ```
 
-## Expand footprint polygons
-Modify the input and output parameters in the script, and then run it to expand the 0-dilation footprint polygons created in the previous step. This is required in order to deal with any inaccuracies and differencies between reality and the LOD2 models. A 2-meter dilation is generally enough.
+## 2. フットプリントポリゴンの拡張
+スクリプト内の入力パラメータと出力パラメータを修正した後、前のステップで作成した 0-dilation フットプリントポリゴンを拡張するためにスクリプトを実行します。これは、現実と LOD2 モデルの間の精度や違いを扱うために必要です。一般的に、2メートルの膨張が十分です。
 ```sh
 python Scripts/02_polygon_expansion.py
 ```
 
-## Extract buildings and align data
-Using the expanded building footprint data created above, the actual LiDAR data is cropped from the point cloud dataset, overlaid and aligned, using the next script:
+## 3. 建物の抽出とデータのアラインメント
+上記で作成した拡張された建物フットプリントデータを使用して、実際の LiDAR データをポイントクラウドデータセットから切り出し、次のスクリプトを使用してオーバーレイおよびアラインメントさせます。
+
+提供されたテストデータはすでにセグメンテーションおよびフィルタ処理されており、主に建物ポイントを含んでいます。これにより、拡張されたフットプリントポリゴンによって含まれる建物の周りの余分な要素が除去されます。
 ```sh
 python Scripts/04_split_dataset_into_buildings_with_realignment.py
 ```
-The test data provided has already been segmented and filtered to contain mostly building points, which gets rid of any extra elements from around the building included by the dilated footprint polygons.
 
-## Combine LiDAR data with LOD2 data
-As the LiDAR data does not cover the entire building (even with scan coverage from every side, the bottom and rooftops are still missing), LOD2 data is used to fill in the gaps with a rough estimate of the building's shape. This is required later for mesh generation.
+## 4. LiDAR データと LOD2 データの結合
+LiDAR データが建物全体をカバーしていないため（各面からスキャンしても、底部や屋根はまだ欠落しています）、LOD2 データを使用して、建物の形状のおおよその推定値を使用してギャップを埋めます。これは後でメッシュ生成に必要になります。
 ```sh
 python Scripts/05_combined_LOD2_and_point_cloud.py
 ```
 
-## Create a mesh using iPSR algorithm
-A Python script is used to launch the included executable, which computes a mesh for the combined point cloud created above.
+## 5. iPSR アルゴリズムを使用してメッシュを作成する
+Python スクリプトを使用して、上記で作成した結合されたポイントクラウドのメッシュを計算する含まれる実行可能ファイルを起動します。
 ```sh
 python Scripts/06_run_iPSR.py
 ```
+
+## ライセンス
+* 本ドキュメントは[Project PLATEAUのサイトポリシー](https://www.mlit.go.jp/plateau/site-policy/)（CCBY4.0および政府標準利用規約2.0）に従い提供されています。
+
+## 注意事項
+* 本レポジトリは参考資料として提供しているものです。動作保証は行っておりません。
+* 予告なく変更・削除する可能性があります。
+* 本レポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
+
+## 参考資料
+* （近日公開）技術検証レポート: https://www.mlit.go.jp/plateau/libraries/technical-reports/
