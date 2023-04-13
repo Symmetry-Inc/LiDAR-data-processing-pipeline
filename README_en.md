@@ -32,12 +32,14 @@ After modifying the input and output parameters in the script, create 0-dilation
 ```sh
 python Scripts/01_create_footprint_polygons.py
 ```
+![image](/Docs/Media/01_create_footprint_polygons_output.png)
 
 ## Expand footprint polygons
 Modify the input and output parameters in the script, and then run it to expand the 0-dilation footprint polygons created in the previous step. This is required in order to deal with any inaccuracies and differencies between reality and the LOD2 models. A 2-meter dilation is generally enough.
 ```sh
 python Scripts/02_polygon_expansion.py
 ```
+![image](/Docs/Media/02_polygon_expansion_output.png)
 
 ## Extract buildings and align data
 Using the expanded building footprint data created above, the actual LiDAR data is cropped from the point cloud dataset, overlaid and aligned, using the next script:
@@ -45,12 +47,16 @@ Using the expanded building footprint data created above, the actual LiDAR data 
 python Scripts/04_split_dataset_into_buildings_with_realignment.py
 ```
 The test data provided has already been segmented and filtered to contain mostly building points, which gets rid of any extra elements from around the building included by the dilated footprint polygons.
+![image](/Docs/Media/04_Combine_LOD2_and_point_cloud_output.png)
+
 
 ## Combine LiDAR data with LOD2 data
 As the LiDAR data does not cover the entire building (even with scan coverage from every side, the bottom and rooftops are still missing), LOD2 data is used to fill in the gaps with a rough estimate of the building's shape. This is required later for mesh generation.
 ```sh
 python Scripts/05_combine_LOD2_and_point_cloud.py
 ```
+![image](/Docs/Media/combine_LiDAR_and_LOD2.png)
+
 
 ## Window detection
 The script above, '05_combine_LOD2_and_point_cloud.py', can also be configured to perform window detection on the data. The algorithm first performs Poisson Surface Reconstruction on the combined LiDAR/LOD2 data (resulting in an inferior mesh compared to iPSR), and uses that mesh to detect window positions, outputting them into a separate mesh of window bounding boxes. See the instructions PDF file for how to configure the script for this.
@@ -60,3 +66,4 @@ A Python script is used to launch the included executable, which computes a mesh
 ```sh
 python Scripts/06_run_iPSR.py
 ```
+![image](/Docs/Media/05_run_iPSR_output.png)
