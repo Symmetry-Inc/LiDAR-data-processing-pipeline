@@ -10,9 +10,9 @@
 
 | モジュール | 処理ステップ | 対応スクリプト |
 |:----------|:------------|:------------|
-| A. 入力データ処理モジュール   | (1) ノイズ除去<br>(2) 建物抽出<br><br>(3) 点群合成 | - <br>01_create_footprint_polygons.py<br>02_polygon_expansion.py<br>04_split_dataset_points_to_buildings_with_realignment.py |
-| B. 変更箇所特定モジュール<br>（[別リポジトリ](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network)） | (4) 変更箇所特定 | pointcloud_similarity.py |
-| C. 3Dメッシュ再構築モジュール | (5) メッシュ再構築<br><br>(6) 窓検出 | 05_combine_lod2_and_point_cloud.py<br>06_run_iPSR.py<br>05_combine_lod2_and_point_cloud.py |
+| A. 入力データ処理   | (1) ノイズ除去<br>(2) 建物抽出<br><br>(3) 点群合成 | - <br>01_create_footprint_polygons.py<br>02_polygon_expansion.py<br>04_split_dataset_points_to_buildings_with_realignment.py |
+| B. 変更箇所特定<br>（[別リポジトリ](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network)） | (4) 変更箇所特定 | pointcloud_similarity.py |
+| C. 3Dメッシュ再構築 | (5) メッシュ再構築<br><br>(6) 窓検出 | 05_combine_lod2_and_point_cloud.py<br>06_run_iPSR.py<br>05_combine_lod2_and_point_cloud.py |
 
 本リポジトリは「A. 入力データ処理モジュール」と「C. 3Dメッシュ再構築モジュール」を含んでおり、「B. 変更箇所特定モジュール」は、[別リポジトリ](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network)にて公開しています。
 
